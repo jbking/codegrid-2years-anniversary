@@ -1,0 +1,111 @@
+ApplicationCacheについて
+CodeGrid二周年記念パーティー
+8 May 2014
+
+MURAOKA Yusuke
+@jbking
+yusuke@jbking.org
+
+* お前だれよ?
+
+.image images/author.jpg 180 270
+
+MURAOKA Yusuke
+フリーランサー(いつも仕事の相談は受け付けてます)
+Python, JavaScript
+最近は専門学校生にC++やJavaScriptを教えたり
+
+* 注意
+
+この発表は結論ないです
+
+試される方はAt your own riskで
+
+
+* 超チューニング祭
+
+去る4/26-27 ニコニコ超会議3内の片隅でひっそりと開催された
+
+.link http://cyoppaya.kunikiya.jp/ 超チューニング祭(http://cyoppaya.kunikiya.jp/)
+
+mobile safariベースの計測ツールでスマートフォン用のニコニコ動画トップページをどれだけ速くできるか、あと見た目(超意訳)
+
+* 色々あって最速賞
+
+.image images/rewards.jpg 250 188
+
+.link http://qiita.com/jbking/items/d87961dc0a4e4b969f76 超チューニング祭で努力賞(最速賞)をとるためにやったこと(http://qiita.com/jbking/items/d87961dc0a4e4b969f76)
+
+最優秀賞のチームの5倍強の速さ
+
+* どんなチーt工夫をしたか
+
+ApplicationCache
+
+manifest
+
+    CACHE MANIFEST
+    # v1
+    /js/minified.js
+    /css/minified.css
+    img/thum/ad.jpg
+    NETWORK:
+    *
+
+html
+
+    <html manifest="...">
+
+* ApplicationCache
+
+.link http://www.html5rocks.com/ja/tutorials/appcache/beginner/ アプリケーションキャッシュ初心者ガイド(http://www.html5rocks.com/ja/tutorials/appcache/beginner/)
+ブラウザにファイルのキャッシュをさせる仕組み
+従来のキャッシュと違い更新していなかったらそもそもリクエストを飛ばさない
+If-Modified-SinceとかEtagより手前の仕組み
+マニフェストの内容の変更をフックとしてブラウザに変更を通知する
+
+
+manifest
+
+    CACHE MANIFEST
+    # コメント何でもいい
+    # ファイルの一覧に変更はないが、ブラウザに変更を通知したいときはここを変える
+    # v1
+    # キャッシュするファイルを並べる
+    /js/minified.js
+    /css/minified.css
+    img/thum/ad.jpg
+    # キャッシュ対象以外のファイルは都度リクエストを送る
+    NETWORK:
+    *
+
+* ApplicationCacheの闇
+
+マニフェストにマニフェスト自体をキャッシュするように指定すると詰む
+開発時はキャッシュを消して対応できるが。。
+
+* ApplicationCacheの使い道
+
+名前の通り
+Webアプリケーションのアプリケーションコード(JavaScriptやCSSとか)をキャッシュ対象に指定してバージョンアップするまで使わせる
+トップページをまるっとキャッシュするとかやらない(競技専用。。)
+
+* 本当にトップページをキャッシュする使い方はできないのか
+
+アクセスログとれない
+-> そもそもアクセスないのだから問題ないのでは
+
+PVやUUの計測
+-> どうせGoogle Analytics仕込んでるでしょ
+
+どれをマニフェストで指定するか管理が手間
+-> 手作業では無理があるのでアセット管理する仕組みと連動するようにすればいいのでは *要検討*
+
+ログインユーザごとに表示される内容が違う
+-> サーバサイドでのページキャッシュではないので問題ない
+-> 毎回リクエストさせたければ"NETWORK:"に指定すればよい
+
+マニフェストを更新したタイミングで一斉にアクセスがくるじゃないか
+-> マニフェスト自体をユーザ毎に用意すればサーバ側からリクエストタイミングを制御できるのでは *要検討*
+
+* ということを議論したいです
